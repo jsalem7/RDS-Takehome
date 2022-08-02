@@ -386,3 +386,30 @@ for p in prob:
     plt.savefig('error-by-d9-p{}.png'.format(p), dpi=400)
     plt.show()
 
+
+def predict(p):
+    data = pd.read_csv('data_preprocessed.csv')
+
+    y = data['application_status'] # true labels
+    X = pd.DataFrame(data.drop(columns=['application_status'],axis=1))
+    
+    predictor = LogisticRegression(random_state=0).fit(X, y)
+    
+    y_hat = predictor.predict(X) # predicted labels
+    
+    y_hat_noisy = y_hat
+    # perturb predictions
+    for i in range(len(y_hat_noisy)):
+        r = np.random.uniform()
+        if y_hat[i] == 0:
+            if r < p:
+                y_hat_noisy[i] = 1
+        elif y_hat[i] == 1:
+            if r < p:
+                y_hat_noisy[i] = 0
+            elif r < 2*p:
+                y_hat_noisy[i] = 2
+        else:
+            if r < p:
+                y_hat_noisy[i] = 1
+    return y_hat_noisy
